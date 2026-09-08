@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Rider / IntelliJ
+.idea/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
