@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjetoMultidiciplinar.Data;
 using ProjetoMultidiciplinar.Services;
+
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,8 @@ builder.Services.AddAuthorization();
 
 //=============================
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // OpenAPI
 builder.Services.AddOpenApi();
@@ -75,6 +78,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 app.UseAuthentication();
 app.UseAuthorization();
