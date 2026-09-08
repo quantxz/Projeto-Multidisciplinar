@@ -9,6 +9,7 @@ using ProjetoMultidiciplinar.DTOs;
 using ProjetoMultidiciplinar.Models;
 using ProjetoMultidiciplinar.Data;
 using ProjetoMultidiciplinar.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProjetoMultidiciplinar.Controllers
 {
@@ -28,6 +29,7 @@ namespace ProjetoMultidiciplinar.Controllers
             _photosService = photosService;
         }
 
+        [Authorize]
         [HttpPost("announce")]
         public async Task<IActionResult> Announce([FromForm] AnnouceDto annouceData)
         {
@@ -69,6 +71,29 @@ namespace ProjetoMultidiciplinar.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(annouce);
+        }
+
+        [Authorize]
+        [HttpGet("announce/user")]
+        public async Task<IActionResult> GetAnnouncesFromUser()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized();
+            }
+
+            var products = await _context.Products
+                .Where(p => p.AuthorId == userGuid)
+                .ToListAsync();
+
+            return Ok(products);
         }
     }
 }
