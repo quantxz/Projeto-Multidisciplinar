@@ -95,5 +95,14 @@ namespace ProjetoMultidiciplinar.Controllers
 
             return Ok(products);
         }
+
+        [Authorize]
+        [HttpGet("announces")]
+        public async Task<IActionResult> GetAnnounces()
+        {
+            var products = await _context.Products.ToListAsync();
+
+            return Ok(products);
+        }
     }
 }
