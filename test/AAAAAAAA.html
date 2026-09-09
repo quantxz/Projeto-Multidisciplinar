@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste SignalR</title>
+
+```
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+    }
+
+    .container {
+        width: 600px;
+        max-width: 90%;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .status {
+        padding: 10px;
+        margin: 20px 0;
+        text-align: center;
+        background: #ddd;
+        border-radius: 5px;
+    }
+
+    .room {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .form {
+        display: flex;
+        gap: 10px;
+    }
+
+    input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        opacity: 0.85;
+    }
+
+    .messages {
+        margin-top: 30px;
+    }
+
+    #messagesList {
+        padding: 0;
+        list-style: none;
+    }
+
+    #messagesList li {
+        padding: 10px;
+        margin-bottom: 5px;
+        background: #eee;
+        border-radius: 5px;
+    }
+
+    .message-author {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .message-content {
+        margin-top: 5px;
+    }
+
+    .message-time {
+        margin-top: 5px;
+        font-size: 11px;
+        color: #999;
+    }
+</style>
+
+<link rel="stylesheet" href="style.css">
+```
+
+</head>
+
+<body>
+
+```
+<main class="container">
+
+    <h1>Teste SignalR</h1>
+
+    <div id="status" class="status">
+        Desconectado
+    </div>
+
+    <!-- Sala -->
+    <div class="room">
+
+        <input
+            type="text"
+            id="roomInput"
+            placeholder="ID da sala (Guid)"
+        >
+
+        <button id="joinButton">
+            Entrar
+        </button>
+
+        <button id="leaveButton">
+            Sair
+        </button>
+
+    </div>
+
+    <!-- Mensagem -->
+    <div class="form">
+
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="Digite uma mensagem"
+        >
+
+        <button id="sendButton">
+            Enviar
+        </button>
+
+    </div>
+
+    <div class="messages">
+
+        <h2>Mensagens</h2>
+
+        <ul id="messagesList"></ul>
+
+    </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+
+<script>
+
+    const status = document.getElementById("status");
+
+    const roomInput = document.getElementById("roomInput");
+
+    const messageInput = document.getElementById("messageInput");
+
+    const joinButton = document.getElementById("joinButton");
+
+    const leaveButton = document.getElementById("leaveButton");
+
+    const sendButton = document.getElementById("sendButton");
+
+    const messagesList = document.getElementById("messagesList");
+
+
+    // ==========================================
+    // TOKEN JWT
+    // ==========================================
+
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjUyODI3NGM4LTcyOTItNGVkMy1iOTRkLWQ0MTIzNGVjOTliYiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJKb8Ojb28iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJqb2F1b29AZW1haWwuY29tIiwiZXhwIjoxNzg4OTcxNDEyLCJpc3MiOiJQcm9qZXRvTXVsdGlkaXNjaXBsaW5hciIsImF1ZCI6IlByb2pldG9NdWx0aWRpc2NpcGxpbmFyIn0.I6RwKB2UvtK-IuLT2oCddxVxzGP8iVMmWNa1I8Hah3A";
+
+
+    // ==========================================
+    // CONEXÃO SIGNALR
+    // ==========================================
+
+    const connection = new signalR.HubConnectionBuilder()
+
+        .withUrl("http://localhost:5207/eventHub", {
+
+            accessTokenFactory: () => token
+
+        })
+
+        .configureLogging(signalR.LogLevel.Information)
+
+        .build();
+
+
+    // ==========================================
+    // RECEBER MENSAGEM
+    // ==========================================
+
+    connection.on("ReceiveMessage", (mensagem) => {
+
+        console.log("Mensagem recebida:", mensagem);
+
+        const li = document.createElement("li");
+
+        const author = document.createElement("div");
+        author.className = "message-author";
+
+        author.textContent =
+            "Autor: " + mensagem.userName;
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+
+        content.textContent = mensagem.content;
+
+        const time = document.createElement("div");
+        time.className = "message-time";
+
+        const date = new Date(mensagem.sentAt);
+
+        time.textContent =
+            date.toLocaleString("pt-BR");
+
+        li.appendChild(author);
+        li.appendChild(content);
+        li.appendChild(time);
+
+        messagesList.appendChild(li);
+
+    });
+
+
+    // ==========================================
+    // ENTRAR NA SALA
+    // ==========================================
+
+    connection.on("EntrouNaSala", (roomId) => {
+
+        console.log("Entrou na sala:", roomId);
+
+        status.textContent =
+            "Conectado à sala: " + roomId;
+
+    });
+
+
+    // ==========================================
+    // SAIR DA SALA
+    // ==========================================
+
+    connection.on("SaiuDaSala", (roomId) => {
+
+        console.log("Saiu da sala:", roomId);
+
+        status.textContent =
+            "Saiu da sala: " + roomId;
+
+    });
+
+
+    // ==========================================
+    // CONECTAR
+    // ==========================================
+
+    async function conectar() {
+
+        try {
+
+            await connection.start();
+
+            console.log("SignalR conectado!");
+
+            status.textContent =
+                "SignalR conectado";
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao conectar:",
+                error
+            );
+
+            status.textContent =
+                "Erro ao conectar";
+
+        }
+
+    }
+
+
+    // ==========================================
+    // ENTRAR NA SALA
+    // ==========================================
+
+    joinButton.addEventListener("click", async () => {
+
+        const roomId = roomInput.value.trim();
+
+        if (!roomId) {
+
+            alert("Informe o ID da sala.");
+
+            return;
+
+        }
+
+        try {
+
+            await connection.invoke(
+                "EntrarNaSala",
+                roomId
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao entrar na sala:",
+                error
+            );
+
+        }
+
+    });
+
+
+    // ==========================================
+    // SAIR DA SALA
+    // ==========================================
+
+    leaveButton.addEventListener("click", async () => {
+
+        const roomId = roomInput.value.trim();
+
+        if (!roomId) {
+
+            alert("Informe o ID da sala.");
+
+            return;
+
+        }
+
+        try {
+
+            await connection.invoke(
+                "SairDaSala",
+                roomId
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao sair da sala:",
+                error
+            );
+
+        }
+
+    });
+
+
+    // ==========================================
+    // ENVIAR MENSAGEM
+    // ==========================================
+
+    sendButton.addEventListener("click", async () => {
+
+        const roomId = roomInput.value.trim();
+
+        const message = messageInput.value.trim();
+
+
+        if (!roomId) {
+
+            alert("Entre em uma sala primeiro.");
+
+            return;
+
+        }
+
+
+        if (!message) {
+
+            return;
+
+        }
+
+
+        try {
+
+            await connection.invoke(
+                "SendMessage",
+                roomId,
+                message
+            );
+
+            messageInput.value = "";
+
+        } catch (error) {
+
+            console.error(
+                "Erro ao enviar mensagem:",
+                error
+            );
+
+        }
+
+    });
+
+
+    // ==========================================
+    // INICIAR CONEXÃO
+    // ==========================================
+
+    conectar();
+
+</script>
+```
+
+</body>
+
+</html>

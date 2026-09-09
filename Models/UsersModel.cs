@@ -27,5 +27,6 @@ namespace ProjetoMultidiciplinar.Models
             
         public ICollection<ProductsModel> Announcements { get; set; } 
             = new List<ProductsModel>();
+            
     }
 }

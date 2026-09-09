@@ -17,5 +17,7 @@ namespace ProjetoMultidiciplinar.Data
         public DbSet<ProductsModel> Products { get; set; }
 
         public DbSet<PhotosModel> Photos { get; set; }
+        
+        public DbSet<RoomsModel> Rooms { get; set; }
     }
 }

@@ -8,12 +8,17 @@ namespace ProjetoMultidiciplinar.DTOs
 {
     public class MessagesDto
     {
-        public Guid ID { get; set; }
+        public Guid ID {get; set;}
 
         public Guid AuthorId { get; set; }
 
-        public UsersModel Author { get; set; }
+        public string Content { get; set; }
 
-        public String Content { get; set; }
+        public DateTime SentAt  { get; set; }
+
+        public Guid RoomId { get; set; }
+
+        public String? UserName {get; set;}
+
     }
 }

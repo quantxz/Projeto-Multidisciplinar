@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjetoMultidiciplinar.Data;
+using ProjetoMultidiciplinar.Hubs;
+using ProjetoMultidiciplinar.Models;
 using ProjetoMultidiciplinar.Services;
 
 DotNetEnv.Env.Load();
@@ -27,39 +29,66 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 // Registra os Controllers
 builder.Services.AddControllers();
-
+//WebSockets
+builder.Services.AddSignalR();
 //==========================JWT
 builder.Services.AddScoped<PhotosService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<MessagesService>();
 
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 
-builder.Services.AddAuthentication(
-    JwtBearerDefaults.AuthenticationScheme
-)
-.AddJwtBearer(options =>
+builder.Services.AddCors(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+    options.AddPolicy("Frontend", policy =>
     {
-        ValidateLifetime = true,
-
-        ValidateIssuer = true,
-
-        ValidateAudience = true,
-
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = jwtIssuer,
-
-        ValidAudience = jwtAudience,
-
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(jwtKey!)
-        )
-    };
+        policy
+            .WithOrigins("http://127.0.0.1:5500")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = "ProjetoMultidisciplinar",
+            ValidAudience = "ProjetoMultidisciplinar",
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey!)
+            )
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/eventHub"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 // Permite utilizar [Authorize]
 builder.Services.AddAuthorization();
@@ -81,9 +110,34 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("Frontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
-// Mapeia os endpoints dos Controllers
+
 app.MapControllers();
 
+app.MapHub<EventHub>("/eventHub");
+
+// Cria salas pra testar o chat
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+//     var room = new RoomsModel
+//     {
+//         Id = Guid.NewGuid(),
+//         Name = "Sala de Teste"
+//     };
+
+//     context.Rooms.Add(room);
+//     context.SaveChanges();
+
+//     Console.WriteLine("=================================");
+//     Console.WriteLine("SALA DE TESTE CRIADA");
+//     Console.WriteLine($"Nome: {room.Name}");
+//     Console.WriteLine($"ID:   {room.Id}");
+//     Console.WriteLine("=================================");
+// }
 app.Run();
