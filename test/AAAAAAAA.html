@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste SignalR</title>
+    <title>Teste SignalR - Chat 1-to-1</title>
 
 ```
 <style>
@@ -20,7 +20,7 @@
     }
 
     .container {
-        width: 600px;
+        width: 700px;
         max-width: 90%;
         margin: 50px auto;
         padding: 30px;
@@ -40,19 +40,28 @@
         border-radius: 5px;
     }
 
-    .room {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
+    .section {
+        margin-bottom: 20px;
     }
 
-    .form {
-        display: flex;
-        gap: 10px;
+    .section label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    textarea {
+        width: 100%;
+        height: 100px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: vertical;
+        font-family: monospace;
     }
 
     input {
-        flex: 1;
+        width: 100%;
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
@@ -67,6 +76,15 @@
 
     button:hover {
         opacity: 0.85;
+    }
+
+    .form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .form input {
+        flex: 1;
     }
 
     .messages {
@@ -99,65 +117,109 @@
         font-size: 11px;
         color: #999;
     }
-</style>
 
-<link rel="stylesheet" href="style.css">
+    .history-button {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .connect-button {
+        width: 100%;
+        margin-top: 10px;
+    }
+</style>
 ```
 
 </head>
 
 <body>
 
-```
 <main class="container">
 
-    <h1>Teste SignalR</h1>
+```
+<h1>Teste SignalR</h1>
 
-    <div id="status" class="status">
-        Desconectado
-    </div>
+<!-- TOKEN -->
 
-    <!-- Sala -->
-    <div class="room">
+<div class="section">
 
-        <input
-            type="text"
-            id="roomInput"
-            placeholder="ID da sala (Guid)"
-        >
+    <label for="tokenInput">
+        Token JWT
+    </label>
 
-        <button id="joinButton">
-            Entrar
-        </button>
+    <textarea
+        id="tokenInput"
+        placeholder="Cole aqui o JWT do usuário..."
+    ></textarea>
 
-        <button id="leaveButton">
-            Sair
-        </button>
+    <button
+        id="connectButton"
+        class="connect-button"
+    >
+        Conectar
+    </button>
 
-    </div>
+</div>
 
-    <!-- Mensagem -->
-    <div class="form">
 
-        <input
-            type="text"
-            id="messageInput"
-            placeholder="Digite uma mensagem"
-        >
+<!-- STATUS -->
 
-        <button id="sendButton">
-            Enviar
-        </button>
+<div id="status" class="status">
+    Desconectado
+</div>
 
-    </div>
 
-    <div class="messages">
+<!-- CONVERSA -->
 
-        <h2>Mensagens</h2>
+<div class="section">
 
-        <ul id="messagesList"></ul>
+    <label for="conversationInput">
+        ID da conversa
+    </label>
 
-    </div>
+    <input
+        type="text"
+        id="conversationInput"
+        placeholder="Guid da conversa"
+    >
+
+    <button
+        id="historyButton"
+        class="history-button"
+    >
+        Carregar histórico
+    </button>
+
+</div>
+
+
+<!-- MENSAGEM -->
+
+<div class="form">
+
+    <input
+        type="text"
+        id="messageInput"
+        placeholder="Digite uma mensagem"
+    >
+
+    <button id="sendButton">
+        Enviar
+    </button>
+
+</div>
+
+
+<!-- MENSAGENS -->
+
+<div class="messages">
+
+    <h2>Mensagens</h2>
+
+    <ul id="messagesList"></ul>
+
+</div>
+```
 
 </main>
 
@@ -165,268 +227,382 @@
 
 <script>
 
-    const status = document.getElementById("status");
+    // ==========================================
+    // ELEMENTOS
+    // ==========================================
 
-    const roomInput = document.getElementById("roomInput");
+    const tokenInput =
+        document.getElementById("tokenInput");
 
-    const messageInput = document.getElementById("messageInput");
+    const connectButton =
+        document.getElementById("connectButton");
 
-    const joinButton = document.getElementById("joinButton");
+    const status =
+        document.getElementById("status");
 
-    const leaveButton = document.getElementById("leaveButton");
+    const conversationInput =
+        document.getElementById("conversationInput");
 
-    const sendButton = document.getElementById("sendButton");
+    const messageInput =
+        document.getElementById("messageInput");
 
-    const messagesList = document.getElementById("messagesList");
+    const sendButton =
+        document.getElementById("sendButton");
+
+    const historyButton =
+        document.getElementById("historyButton");
+
+    const messagesList =
+        document.getElementById("messagesList");
 
 
     // ==========================================
-    // TOKEN JWT
+    // CONEXÃO
     // ==========================================
 
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjUyODI3NGM4LTcyOTItNGVkMy1iOTRkLWQ0MTIzNGVjOTliYiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJKb8Ojb28iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJqb2F1b29AZW1haWwuY29tIiwiZXhwIjoxNzg4OTcxNDEyLCJpc3MiOiJQcm9qZXRvTXVsdGlkaXNjaXBsaW5hciIsImF1ZCI6IlByb2pldG9NdWx0aWRpc2NpcGxpbmFyIn0.I6RwKB2UvtK-IuLT2oCddxVxzGP8iVMmWNa1I8Hah3A";
-
-
-    // ==========================================
-    // CONEXÃO SIGNALR
-    // ==========================================
-
-    const connection = new signalR.HubConnectionBuilder()
-
-        .withUrl("http://localhost:5207/eventHub", {
-
-            accessTokenFactory: () => token
-
-        })
-
-        .configureLogging(signalR.LogLevel.Information)
-
-        .build();
+    let connection = null;
 
 
     // ==========================================
-    // RECEBER MENSAGEM
+    // ADICIONAR MENSAGEM
     // ==========================================
 
-    connection.on("ReceiveMessage", (mensagem) => {
+    function adicionarMensagem(mensagem) {
 
-        console.log("Mensagem recebida:", mensagem);
+        console.log(
+            "Mensagem recebida:",
+            mensagem
+        );
 
-        const li = document.createElement("li");
 
-        const author = document.createElement("div");
-        author.className = "message-author";
+        const li =
+            document.createElement("li");
+
+
+        const author =
+            document.createElement("div");
+
+        author.className =
+            "message-author";
 
         author.textContent =
-            "Autor: " + mensagem.userName;
+            "Autor: " + mensagem.authorId;
 
-        const content = document.createElement("div");
-        content.className = "message-content";
 
-        content.textContent = mensagem.content;
+        const content =
+            document.createElement("div");
 
-        const time = document.createElement("div");
-        time.className = "message-time";
+        content.className =
+            "message-content";
 
-        const date = new Date(mensagem.sentAt);
+        content.textContent =
+            mensagem.content;
+
+
+        const time =
+            document.createElement("div");
+
+        time.className =
+            "message-time";
+
+
+        const date =
+            new Date(mensagem.sentAt);
+
 
         time.textContent =
             date.toLocaleString("pt-BR");
+
 
         li.appendChild(author);
         li.appendChild(content);
         li.appendChild(time);
 
         messagesList.appendChild(li);
-
-    });
-
-
-    // ==========================================
-    // ENTRAR NA SALA
-    // ==========================================
-
-    connection.on("EntrouNaSala", (roomId) => {
-
-        console.log("Entrou na sala:", roomId);
-
-        status.textContent =
-            "Conectado à sala: " + roomId;
-
-    });
-
-
-    // ==========================================
-    // SAIR DA SALA
-    // ==========================================
-
-    connection.on("SaiuDaSala", (roomId) => {
-
-        console.log("Saiu da sala:", roomId);
-
-        status.textContent =
-            "Saiu da sala: " + roomId;
-
-    });
+    }
 
 
     // ==========================================
     // CONECTAR
     // ==========================================
 
-    async function conectar() {
+    connectButton.addEventListener(
+        "click",
+        async () => {
 
-        try {
+            const token =
+                tokenInput.value.trim();
 
-            await connection.start();
 
-            console.log("SignalR conectado!");
+            if (!token) {
 
-            status.textContent =
-                "SignalR conectado";
+                alert(
+                    "Cole um token JWT primeiro."
+                );
 
-        } catch (error) {
+                return;
+            }
 
-            console.error(
-                "Erro ao conectar:",
-                error
+
+            // Evita criar várias conexões
+
+            if (
+                connection &&
+                connection.state ===
+                    signalR.HubConnectionState.Connected
+            ) {
+
+                alert(
+                    "Já existe uma conexão."
+                );
+
+                return;
+            }
+
+
+            connection =
+                new signalR.HubConnectionBuilder()
+
+                    .withUrl(
+                        "http://localhost:5207/eventHub",
+                        {
+                            accessTokenFactory: () =>
+                                token
+                        }
+                    )
+
+                    .configureLogging(
+                        signalR.LogLevel.Information
+                    )
+
+                    .build();
+
+
+            // ==================================
+            // RECEBER MENSAGEM
+            // ==================================
+
+            connection.on(
+                "ReceiveMessage",
+                (mensagem) => {
+
+                    adicionarMensagem(
+                        mensagem
+                    );
+
+                }
             );
 
-            status.textContent =
-                "Erro ao conectar";
+
+            // ==================================
+            // INICIAR
+            // ==================================
+
+            try {
+
+                await connection.start();
+
+                console.log(
+                    "SignalR conectado!"
+                );
+
+                status.textContent =
+                    "Conectado";
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao conectar:",
+                    error
+                );
+
+                status.textContent =
+                    "Erro ao conectar";
+
+            }
 
         }
-
-    }
-
-
-    // ==========================================
-    // ENTRAR NA SALA
-    // ==========================================
-
-    joinButton.addEventListener("click", async () => {
-
-        const roomId = roomInput.value.trim();
-
-        if (!roomId) {
-
-            alert("Informe o ID da sala.");
-
-            return;
-
-        }
-
-        try {
-
-            await connection.invoke(
-                "EntrarNaSala",
-                roomId
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Erro ao entrar na sala:",
-                error
-            );
-
-        }
-
-    });
-
-
-    // ==========================================
-    // SAIR DA SALA
-    // ==========================================
-
-    leaveButton.addEventListener("click", async () => {
-
-        const roomId = roomInput.value.trim();
-
-        if (!roomId) {
-
-            alert("Informe o ID da sala.");
-
-            return;
-
-        }
-
-        try {
-
-            await connection.invoke(
-                "SairDaSala",
-                roomId
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Erro ao sair da sala:",
-                error
-            );
-
-        }
-
-    });
+    );
 
 
     // ==========================================
     // ENVIAR MENSAGEM
     // ==========================================
 
-    sendButton.addEventListener("click", async () => {
+    sendButton.addEventListener(
+        "click",
+        async () => {
 
-        const roomId = roomInput.value.trim();
+            const conversationID =
+                conversationInput.value.trim();
 
-        const message = messageInput.value.trim();
+            const message =
+                messageInput.value.trim();
 
 
-        if (!roomId) {
+            if (!connection ||
+                connection.state !==
+                    signalR.HubConnectionState.Connected) {
 
-            alert("Entre em uma sala primeiro.");
+                alert(
+                    "Conecte-se primeiro."
+                );
 
-            return;
+                return;
+            }
+
+
+            if (!conversationID) {
+
+                alert(
+                    "Informe o ID da conversa."
+                );
+
+                return;
+            }
+
+
+            if (!message) {
+
+                return;
+            }
+
+
+            try {
+
+                await connection.invoke(
+                    "SendMessage",
+                    conversationID,
+                    message
+                );
+
+
+                messageInput.value = "";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao enviar mensagem:",
+                    error
+                );
+
+            }
 
         }
-
-
-        if (!message) {
-
-            return;
-
-        }
-
-
-        try {
-
-            await connection.invoke(
-                "SendMessage",
-                roomId,
-                message
-            );
-
-            messageInput.value = "";
-
-        } catch (error) {
-
-            console.error(
-                "Erro ao enviar mensagem:",
-                error
-            );
-
-        }
-
-    });
+    );
 
 
     // ==========================================
-    // INICIAR CONEXÃO
+    // HISTÓRICO
     // ==========================================
 
-    conectar();
+    historyButton.addEventListener(
+        "click",
+        async () => {
+
+            const conversationID =
+                conversationInput.value.trim();
+
+            const token =
+                tokenInput.value.trim();
+
+
+            if (!token) {
+
+                alert(
+                    "Informe o token JWT."
+                );
+
+                return;
+            }
+
+
+            if (!conversationID) {
+
+                alert(
+                    "Informe o ID da conversa."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `http://localhost:5207/conversation/${conversationID}/messages`,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `HTTP ${response.status}`
+                    );
+
+                }
+
+
+                const messages =
+                    await response.json();
+
+
+                messagesList.innerHTML =
+                    "";
+
+
+                messages.forEach(
+                    mensagem => {
+
+                        adicionarMensagem(
+                            mensagem
+                        );
+
+                    }
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao carregar histórico:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    // ==========================================
+    // ENTER PARA ENVIAR
+    // ==========================================
+
+    messageInput.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (event.key === "Enter") {
+
+                sendButton.click();
+
+            }
+
+        }
+    );
 
 </script>
-```
 
 </body>
 

@@ -16,7 +16,7 @@ namespace ProjetoMultidiciplinar.DTOs
 
         public DateTime SentAt  { get; set; }
 
-        public Guid RoomId { get; set; }
+        public Guid ConversationId { get; set; }
 
         public String? UserName {get; set;}
 

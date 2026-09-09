@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProjetoMultidiciplinar.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ProjetoMultidiciplinar.Controllers
 {
@@ -20,10 +21,12 @@ namespace ProjetoMultidiciplinar.Controllers
 
         private readonly AppDbContext _context;
         private readonly JwtService _jwtService;
-        public UsersController(AppDbContext context, JwtService jwtService)
+        private readonly MessagesService _messagesService;
+        public UsersController(AppDbContext context, JwtService jwtService, MessagesService messagesService)
         {
             _jwtService = jwtService;
             _context = context;
+            _messagesService = messagesService;
         }
 
         [Authorize]
@@ -90,7 +93,25 @@ namespace ProjetoMultidiciplinar.Controllers
             });
         }
 
-        
+        [HttpGet("conversations")]
+        public async Task<IActionResult> GetConversations()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized();
+            }
+
+            var Conversations = await _messagesService.GetConversations(userGuid);
+
+            return Ok(Conversations);
+        }
 
     }
 }

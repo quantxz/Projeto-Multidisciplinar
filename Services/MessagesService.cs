@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using ProjetoMultidiciplinar.Data;
 using ProjetoMultidiciplinar.DTOs;
 using ProjetoMultidiciplinar.Models;
 
 namespace ProjetoMultidiciplinar.Services
 {
+    [Authorize]
     public class MessagesService
     {
         private readonly AppDbContext _context;
@@ -27,7 +32,7 @@ namespace ProjetoMultidiciplinar.Services
                 AuthorId = messageData.AuthorId,
                 Content = messageData.Content,
                 SentAt = messageData.SentAt,
-                RoomId = messageData.RoomId
+                ConversationId = messageData.ConversationId
             };
 
             _context.Messages.Add(message);
@@ -35,5 +40,25 @@ namespace ProjetoMultidiciplinar.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<ConversationsModel>> GetConversations(Guid userId)
+        {
+            return await _context.Conversations
+                .Where(c => c.User1Id == userId || c.User2Id == userId)
+                .ToListAsync();
+        }
+
+        public async Task<List<MessagesModel>> GetMessages(Guid conversationId)
+        {
+            return await _context.Messages
+                .Where(m => m.ConversationId == conversationId)
+                .OrderBy(m => m.SentAt)
+                .ToListAsync();
+        }
+
+        public async Task<ConversationsModel?> GetConversation(Guid conversationId)
+        {
+            return await _context.Conversations
+                .FirstOrDefaultAsync(c => c.ID == conversationId);
+        }
     }
 }

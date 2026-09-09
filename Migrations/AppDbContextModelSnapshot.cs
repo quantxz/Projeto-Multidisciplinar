@@ -22,6 +22,23 @@ namespace ProjetoMultidiciplinar.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("ProjetoMultidiciplinar.Models.ConversationsModel", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Conversations");
+                });
+
             modelBuilder.Entity("ProjetoMultidiciplinar.Models.MessagesModel", b =>
                 {
                     b.Property<Guid>("ID")
@@ -35,7 +52,10 @@ namespace ProjetoMultidiciplinar.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("RoomId")
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("ConversationsModelID")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("SentAt")
@@ -45,6 +65,8 @@ namespace ProjetoMultidiciplinar.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ConversationsModelID");
 
                     b.HasIndex("UsersModelID");
 
@@ -101,30 +123,11 @@ namespace ProjetoMultidiciplinar.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("ProjetoMultidiciplinar.Models.RoomsModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Rooms");
-                });
-
             modelBuilder.Entity("ProjetoMultidiciplinar.Models.UsersModel", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
-
-                    b.PrimitiveCollection<string>("ChatRooms")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -148,6 +151,10 @@ namespace ProjetoMultidiciplinar.Migrations
 
             modelBuilder.Entity("ProjetoMultidiciplinar.Models.MessagesModel", b =>
                 {
+                    b.HasOne("ProjetoMultidiciplinar.Models.ConversationsModel", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationsModelID");
+
                     b.HasOne("ProjetoMultidiciplinar.Models.UsersModel", null)
                         .WithMany("Messages")
                         .HasForeignKey("UsersModelID");
@@ -165,6 +172,11 @@ namespace ProjetoMultidiciplinar.Migrations
                     b.HasOne("ProjetoMultidiciplinar.Models.UsersModel", null)
                         .WithMany("Announcements")
                         .HasForeignKey("UsersModelID");
+                });
+
+            modelBuilder.Entity("ProjetoMultidiciplinar.Models.ConversationsModel", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("ProjetoMultidiciplinar.Models.ProductsModel", b =>

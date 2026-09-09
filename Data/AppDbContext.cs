@@ -18,6 +18,6 @@ namespace ProjetoMultidiciplinar.Data
 
         public DbSet<PhotosModel> Photos { get; set; }
         
-        public DbSet<RoomsModel> Rooms { get; set; }
+        public DbSet<ConversationsModel> Conversations { get; set; }
     }
 }

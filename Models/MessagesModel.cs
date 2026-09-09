@@ -12,15 +12,15 @@ namespace ProjetoMultidiciplinar.Models
 
         [Required]
         public Guid AuthorId { get; set; }
-
+        
         [Required]
-        public Guid RoomId { get; set; }
+        public Guid ConversationId { get; set; }
 
         [Required]
         public String Content { get; set; }
 
         public DateTime SentAt { get; set; }
 
-        
+
     }
 }

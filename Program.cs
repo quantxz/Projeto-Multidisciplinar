@@ -1,10 +1,12 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjetoMultidiciplinar.Data;
 using ProjetoMultidiciplinar.Hubs;
 using ProjetoMultidiciplinar.Models;
+using ProjetoMultidiciplinar.Providers;
 using ProjetoMultidiciplinar.Services;
 
 DotNetEnv.Env.Load();
@@ -97,6 +99,8 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 
 // OpenAPI
 builder.Services.AddOpenApi();
@@ -121,23 +125,32 @@ app.MapHub<EventHub>("/eventHub");
 
 // Cria salas pra testar o chat
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
-//     var room = new RoomsModel
-//     {
-//         Id = Guid.NewGuid(),
-//         Name = "Sala de Teste"
-//     };
+    var conversation = new ConversationsModel
+    {
+        ID = Guid.NewGuid(),
 
-//     context.Rooms.Add(room);
-//     context.SaveChanges();
+        User1Id = Guid.Parse(
+            "18689fa9-1b4a-4dc2-8e94-987ba871ac95"
+        ),
 
-//     Console.WriteLine("=================================");
-//     Console.WriteLine("SALA DE TESTE CRIADA");
-//     Console.WriteLine($"Nome: {room.Name}");
-//     Console.WriteLine($"ID:   {room.Id}");
-//     Console.WriteLine("=================================");
-// }
+        User2Id = Guid.Parse(
+            "c1514ef7-a967-444d-8f07-18e7ca68be2f"
+        )
+    };
+
+    context.Conversations.Add(conversation);
+
+    await context.SaveChangesAsync();
+
+    Console.WriteLine(
+        $"Conversation criada: {conversation.ID}"
+    );
+}
+
+
 app.Run();
