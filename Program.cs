@@ -125,32 +125,32 @@ app.MapHub<EventHub>("/eventHub");
 
 // Cria salas pra testar o chat
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider
-        .GetRequiredService<AppDbContext>();
+// using (var scope = app.Services.CreateScope())
+// {
+//     var context = scope.ServiceProvider
+//         .GetRequiredService<AppDbContext>();
 
-    var conversation = new ConversationsModel
-    {
-        ID = Guid.NewGuid(),
+//     var conversation = new ConversationsModel
+//     {
+//         ID = Guid.NewGuid(),
 
-        User1Id = Guid.Parse(
-            "18689fa9-1b4a-4dc2-8e94-987ba871ac95"
-        ),
+//         User1Id = Guid.Parse(
+//             "18689fa9-1b4a-4dc2-8e94-987ba871ac95"
+//         ),
 
-        User2Id = Guid.Parse(
-            "c1514ef7-a967-444d-8f07-18e7ca68be2f"
-        )
-    };
+//         User2Id = Guid.Parse(
+//             "c1514ef7-a967-444d-8f07-18e7ca68be2f"
+//         )
+//     };
 
-    context.Conversations.Add(conversation);
+//     context.Conversations.Add(conversation);
 
-    await context.SaveChangesAsync();
+//     await context.SaveChangesAsync();
 
-    Console.WriteLine(
-        $"Conversation criada: {conversation.ID}"
-    );
-}
+//     Console.WriteLine(
+//         $"Conversation criada: {conversation.ID}"
+//     );
+// }
 
 
 app.Run();

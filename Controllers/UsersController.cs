@@ -14,6 +14,7 @@ using System.Security.Claims;
 
 namespace ProjetoMultidiciplinar.Controllers
 {
+
     [ApiController]
     [Route("users")]
     public class UsersController : ControllerBase
@@ -29,7 +30,7 @@ namespace ProjetoMultidiciplinar.Controllers
             _messagesService = messagesService;
         }
 
-        [Authorize]
+    [Authorize]
         [HttpGet("profile")]
         public IActionResult Profile()
         {

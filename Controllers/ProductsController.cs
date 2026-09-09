@@ -29,7 +29,7 @@ namespace ProjetoMultidiciplinar.Controllers
             _photosService = photosService;
         }
 
-        [Authorize]
+
         [HttpPost("announce")]
         public async Task<IActionResult> Announce([FromForm] AnnouceDto annouceData)
         {
@@ -73,7 +73,7 @@ namespace ProjetoMultidiciplinar.Controllers
             return Ok(annouce);
         }
 
-        [Authorize]
+
         [HttpGet("announce/user")]
         public async Task<IActionResult> GetAnnouncesFromUser()
         {
@@ -96,7 +96,7 @@ namespace ProjetoMultidiciplinar.Controllers
             return Ok(products);
         }
 
-        [Authorize]
+
         [HttpGet("announces")]
         public async Task<IActionResult> GetAnnounces()
         {

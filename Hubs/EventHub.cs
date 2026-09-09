@@ -29,6 +29,9 @@ namespace ProjetoMultidiciplinar.Hubs
             if (!Guid.TryParse(userId, out var authorId))
                 throw new HubException("Usuário não autenticado.");
 
+            var userName = Context.User?
+                .FindFirst(ClaimTypes.Name)?.Value;
+
             var conversation = await _messagesService
                 .GetConversation(conversationID);
 
@@ -53,7 +56,8 @@ namespace ProjetoMultidiciplinar.Hubs
                 AuthorId = authorId,
                 ConversationId = conversationID,
                 Content = message,
-                SentAt = DateTime.UtcNow
+                SentAt = DateTime.UtcNow,
+                UserName = userName
             };
 
             // Salva

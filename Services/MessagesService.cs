@@ -22,7 +22,6 @@ namespace ProjetoMultidiciplinar.Services
         }
 
 
-
         public async Task SaveMessages(MessagesDto messageData)
         {
 
@@ -47,10 +46,24 @@ namespace ProjetoMultidiciplinar.Services
                 .ToListAsync();
         }
 
-        public async Task<List<MessagesModel>> GetMessages(Guid conversationId)
+        public async Task<List<MessagesDto>> GetMessages(Guid conversationId)
         {
             return await _context.Messages
                 .Where(m => m.ConversationId == conversationId)
+                .Join(
+                    _context.Users,
+                    message => message.AuthorId,
+                    user => user.ID,
+                    (message, user) => new MessagesDto
+                    {
+                        ID = message.ID,
+                        AuthorId = message.AuthorId,
+                        UserName = user.Name,
+                        ConversationId = message.ConversationId,
+                        Content = message.Content,
+                        SentAt = message.SentAt
+                    }
+                )
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
         }

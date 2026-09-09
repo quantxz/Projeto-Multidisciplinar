@@ -9,6 +9,7 @@ using ProjetoMultidiciplinar.Services;
 
 namespace ProjetoMultidiciplinar.Controllers
 {
+        [Authorize]
     [ApiController]
     [Route("conversation")]
     public class ConversationsController : ControllerBase
@@ -18,9 +19,7 @@ namespace ProjetoMultidiciplinar.Controllers
         {
             _messageService = messagesService;
         }
-
-
-        [Authorize]
+        
         [HttpGet("{conversationId}/messages")]
         public async Task<IActionResult> GetMessages(Guid conversationId)
         {
@@ -28,6 +27,8 @@ namespace ProjetoMultidiciplinar.Controllers
 
             if (!Guid.TryParse(userIdString, out var userId))
                 return Unauthorized();
+
+            var userName = User.FindFirstValue(ClaimTypes.Name);
 
             var conversation = await _messageService
                 .GetConversation(conversationId);
@@ -43,6 +44,8 @@ namespace ProjetoMultidiciplinar.Controllers
 
             var messages = await _messageService
                 .GetMessages(conversationId);
+
+            
 
             return Ok(messages);
         }
