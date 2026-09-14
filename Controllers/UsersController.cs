@@ -30,7 +30,7 @@ namespace ProjetoMultidiciplinar.Controllers
             _messagesService = messagesService;
         }
 
-    [Authorize]
+        [Authorize]
         [HttpGet("profile")]
         public IActionResult Profile()
         {
@@ -59,7 +59,12 @@ namespace ProjetoMultidiciplinar.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(user);
+            var token = _jwtService.GenerateToken(user);
+
+            return Ok(new
+            {
+                token = token
+            });
         }
 
         [HttpPost("login")]
