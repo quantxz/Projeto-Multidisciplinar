@@ -18,10 +18,17 @@ namespace ProjetoMultidiciplinar.Hubs
 
         public async Task SendMessage(
             Guid conversationID,
-            string message)
+            string message,
+            string? fileUrl = null,
+            string? fileName = null)
         {
-            if (string.IsNullOrWhiteSpace(message))
-                throw new HubException("A mensagem não pode estar vazia.");
+            if (string.IsNullOrWhiteSpace(message) &&
+                string.IsNullOrWhiteSpace(fileUrl))
+            {
+                throw new HubException(
+                    "A mensagem precisa conter texto ou arquivo."
+                );
+            }
 
             var userId = Context.User?
                 .FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -38,7 +45,8 @@ namespace ProjetoMultidiciplinar.Hubs
             if (conversation == null)
                 throw new HubException("Conversa não encontrada.");
 
-            // Descobre quem vai receber
+
+
             Guid receiverId;
 
             if (conversation.User1Id == authorId)
@@ -57,7 +65,9 @@ namespace ProjetoMultidiciplinar.Hubs
                 ConversationId = conversationID,
                 Content = message,
                 SentAt = DateTime.UtcNow,
-                UserName = userName
+                UserName = userName,
+                FileUrl = fileUrl,
+                FileName = fileName
             };
 
             // Salva

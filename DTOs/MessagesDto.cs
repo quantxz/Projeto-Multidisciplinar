@@ -18,6 +18,9 @@ namespace ProjetoMultidiciplinar.DTOs
 
         public Guid ConversationId { get; set; }
 
+        public String? FileUrl;
+        public String? FileName;
+
         public String? UserName {get; set;}
 
     }

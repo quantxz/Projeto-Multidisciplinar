@@ -34,7 +34,7 @@ builder.Services.AddControllers();
 //WebSockets
 builder.Services.AddSignalR();
 //==========================JWT
-builder.Services.AddScoped<PhotosService>();
+builder.Services.AddScoped<FilesService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<MessagesService>();
 

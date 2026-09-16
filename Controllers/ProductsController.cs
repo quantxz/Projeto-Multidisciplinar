@@ -19,14 +19,14 @@ namespace ProjetoMultidiciplinar.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly PhotosService _photosService;
+        private readonly FilesService _fileService;
 
         public ProductsController(
             AppDbContext context,
-            PhotosService photosService)
+            FilesService fileService)
         {
             _context = context;
-            _photosService = photosService;
+            _fileService = fileService;
         }
 
 
@@ -57,7 +57,7 @@ namespace ProjetoMultidiciplinar.Controllers
             {
                 foreach (var image in annouceData.Images)
                 {
-                    var photoData = await _photosService.SavePhoto(image);
+                    var photoData = await _fileService.SaveFile(image);
 
                     var photo = new PhotosModel
                     {

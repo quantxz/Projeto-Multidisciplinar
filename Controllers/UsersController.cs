@@ -23,13 +23,13 @@ namespace ProjetoMultidiciplinar.Controllers
         private readonly AppDbContext _context;
         private readonly JwtService _jwtService;
         private readonly MessagesService _messagesService;
-        private readonly PhotosService _photosService;
-        public UsersController(AppDbContext context, JwtService jwtService, MessagesService messagesService, PhotosService photosService)
+        private readonly FilesService _fileService;
+        public UsersController(AppDbContext context, JwtService jwtService, MessagesService messagesService, FilesService fileService)
         {
             _jwtService = jwtService;
             _context = context;
             _messagesService = messagesService;
-            _photosService = photosService;
+            _fileService = fileService;
         }
 
         [Authorize]
@@ -183,7 +183,7 @@ namespace ProjetoMultidiciplinar.Controllers
 
             if (userDto.PhotoUrl != null)
             {
-                var photoData = await _photosService.SavePhoto(userDto.PhotoUrl);
+                var photoData = await _fileService.SaveFile(userDto.PhotoUrl);
 
                 user.PhotoUrl = photoData.Url;
                 Console.WriteLine(photoData);

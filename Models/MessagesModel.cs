@@ -18,6 +18,8 @@ namespace ProjetoMultidiciplinar.Models
 
         [Required]
         public String Content { get; set; }
+      
+        public String? fileUrl { get; set; } = string.Empty;
 
         public DateTime SentAt { get; set; }
 
