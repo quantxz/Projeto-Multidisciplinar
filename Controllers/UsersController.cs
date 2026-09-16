@@ -72,7 +72,7 @@ namespace ProjetoMultidiciplinar.Controllers
 
             if (!Guid.TryParse(userId, out var userGuid))
             {
-                return Unauthorized();
+                return Forbid();
             }
 
             var Conversations = await _messagesService.GetConversations(userGuid);

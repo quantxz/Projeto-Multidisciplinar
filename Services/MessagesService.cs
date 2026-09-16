@@ -31,7 +31,8 @@ namespace ProjetoMultidiciplinar.Services
                 AuthorId = messageData.AuthorId,
                 Content = messageData.Content,
                 SentAt = messageData.SentAt,
-                ConversationId = messageData.ConversationId
+                ConversationId = messageData.ConversationId,
+                fileUrl = messageData.FileUrl
             };
 
             _context.Messages.Add(message);
@@ -61,7 +62,8 @@ namespace ProjetoMultidiciplinar.Services
                         UserName = user.Name,
                         ConversationId = message.ConversationId,
                         Content = message.Content,
-                        SentAt = message.SentAt
+                        SentAt = message.SentAt,
+                        FileUrl = message.fileUrl
                     }
                 )
                 .OrderBy(m => m.SentAt)

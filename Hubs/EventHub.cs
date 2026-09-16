@@ -66,8 +66,7 @@ namespace ProjetoMultidiciplinar.Hubs
                 Content = message,
                 SentAt = DateTime.UtcNow,
                 UserName = userName,
-                FileUrl = fileUrl,
-                FileName = fileName
+                FileUrl = fileUrl
             };
 
             // Salva

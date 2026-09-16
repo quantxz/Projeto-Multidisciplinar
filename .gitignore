@@ -12,6 +12,7 @@ obj/
 
 # Environment
 .env
+.example.env
 
 # Logs
 *.log

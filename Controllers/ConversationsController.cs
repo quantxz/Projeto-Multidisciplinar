@@ -50,13 +50,11 @@ namespace ProjetoMultidiciplinar.Controllers
             var messages = await _messageService
                 .GetMessages(conversationId);
 
-
-
             return Ok(messages);
         }
 
-        [HttpPost("{conversationId}/photo")]
-        public async Task<IActionResult> SavePhotoInMessage(
+        [HttpPost("{conversationId}/file")]
+        public async Task<IActionResult> SaveFileInMessage(
             Guid conversationId,
             [FromForm] IFormFile file)
         {
@@ -79,7 +77,7 @@ namespace ProjetoMultidiciplinar.Controllers
             }
 
             var result = await _fileService.SaveFile(file);
-
+            Console.WriteLine(result);
             return Ok(new
             {
                 fileName = result.FileName,

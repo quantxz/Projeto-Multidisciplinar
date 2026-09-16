@@ -8,20 +8,19 @@ namespace ProjetoMultidiciplinar.DTOs
 {
     public class MessagesDto
     {
-        public Guid ID {get; set;}
+        public Guid ID { get; set; }
 
         public Guid AuthorId { get; set; }
 
         public string Content { get; set; }
 
-        public DateTime SentAt  { get; set; }
+        public DateTime SentAt { get; set; }
 
         public Guid ConversationId { get; set; }
 
-        public String? FileUrl;
-        public String? FileName;
-
-        public String? UserName {get; set;}
+        public string? FileUrl { get; set; }
+        
+        public String? UserName { get; set; }
 
     }
 }

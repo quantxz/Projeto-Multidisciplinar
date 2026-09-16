@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 
 <html lang="pt-BR">
@@ -5,564 +6,563 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste SignalR - Chat 1-to-1</title>
 
-```
-<style>
-    * {
-        box-sizing: border-box;
-    }
+    <title>Teste SignalR - Chat com Arquivos</title>
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f2f2f2;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    .container {
-        width: 700px;
-        max-width: 90%;
-        margin: 50px auto;
-        padding: 30px;
-        background: white;
-        border-radius: 10px;
-    }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+        }
 
-    h1 {
-        text-align: center;
-    }
+        .container {
+            width: 700px;
+            max-width: 90%;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+        }
 
-    .status {
-        padding: 10px;
-        margin: 20px 0;
-        text-align: center;
-        background: #ddd;
-        border-radius: 5px;
-    }
+        h1 {
+            text-align: center;
+        }
 
-    .section {
-        margin-bottom: 20px;
-    }
+        .status {
+            padding: 10px;
+            margin: 20px 0;
+            text-align: center;
+            background: #ddd;
+            border-radius: 5px;
+        }
 
-    .section label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
+        .section {
+            margin-bottom: 20px;
+        }
 
-    textarea {
-        width: 100%;
-        height: 100px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        resize: vertical;
-        font-family: monospace;
-    }
+        .section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
 
-    input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
 
-    button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+            border: 1px solid #ccc;
+            border-radius: 5px;
 
-    button:hover {
-        opacity: 0.85;
-    }
+            resize: vertical;
+            font-family: monospace;
+        }
 
-    .form {
-        display: flex;
-        gap: 10px;
-    }
+        input {
+            width: 100%;
+            padding: 10px;
 
-    .form input {
-        flex: 1;
-    }
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-    .messages {
-        margin-top: 30px;
-    }
+        button {
+            padding: 10px 20px;
 
-    #messagesList {
-        padding: 0;
-        list-style: none;
-    }
+            border: none;
+            border-radius: 5px;
 
-    #messagesList li {
-        padding: 10px;
-        margin-bottom: 5px;
-        background: #eee;
-        border-radius: 5px;
-    }
+            cursor: pointer;
+        }
 
-    .message-author {
-        font-size: 12px;
-        color: #666;
-    }
+        button:hover {
+            opacity: 0.85;
+        }
 
-    .message-content {
-        margin-top: 5px;
-    }
+        .form {
+            display: flex;
+            gap: 10px;
+        }
 
-    .message-time {
-        margin-top: 5px;
-        font-size: 11px;
-        color: #999;
-    }
+        .form input {
+            flex: 1;
+        }
 
-    .history-button {
-        width: 100%;
-        margin-top: 10px;
-    }
+        .messages {
+            margin-top: 30px;
+        }
 
-    .connect-button {
-        width: 100%;
-        margin-top: 10px;
-    }
-</style>
-```
+        #messagesList {
+            padding: 0;
+            list-style: none;
+        }
+
+        #messagesList li {
+            padding: 10px;
+            margin-bottom: 8px;
+
+            background: #eee;
+
+            border-radius: 5px;
+        }
+
+        .message-author {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .message-content {
+            margin-top: 5px;
+        }
+
+        .message-file {
+            margin-top: 10px;
+            padding: 10px;
+
+            background: white;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .message-file a {
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .message-time {
+            margin-top: 5px;
+
+            font-size: 11px;
+            color: #999;
+        }
+
+        .history-button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .connect-button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .file-section {
+            margin-top: 10px;
+        }
+
+        .selected-file {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .send-area {
+            margin-top: 15px;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<main class="container">
+    <main class="container">
 
-```
-<h1>Teste SignalR</h1>
-
-<!-- TOKEN -->
-
-<div class="section">
-
-    <label for="tokenInput">
-        Token JWT
-    </label>
-
-    <textarea
-        id="tokenInput"
-        placeholder="Cole aqui o JWT do usuário..."
-    ></textarea>
-
-    <button
-        id="connectButton"
-        class="connect-button"
-    >
-        Conectar
-    </button>
-
-</div>
+        <h1>Teste SignalR</h1>
 
 
-<!-- STATUS -->
+        <!-- ============================= -->
+        <!-- TOKEN -->
+        <!-- ============================= -->
 
-<div id="status" class="status">
-    Desconectado
-</div>
+        <div class="section">
 
+            <label for="tokenInput">
+                Token JWT
+            </label>
 
-<!-- CONVERSA -->
+            <textarea id="tokenInput" placeholder="Cole aqui o JWT do usuário..."></textarea>
 
-<div class="section">
+            <button id="connectButton" class="connect-button">
+                Conectar
+            </button>
 
-    <label for="conversationInput">
-        ID da conversa
-    </label>
-
-    <input
-        type="text"
-        id="conversationInput"
-        placeholder="Guid da conversa"
-    >
-
-    <button
-        id="historyButton"
-        class="history-button"
-    >
-        Carregar histórico
-    </button>
-
-</div>
+        </div>
 
 
-<!-- MENSAGEM -->
+        <!-- ============================= -->
+        <!-- STATUS -->
+        <!-- ============================= -->
 
-<div class="form">
-
-    <input
-        type="text"
-        id="messageInput"
-        placeholder="Digite uma mensagem"
-    >
-
-    <button id="sendButton">
-        Enviar
-    </button>
-
-</div>
+        <div id="status" class="status">
+            Desconectado
+        </div>
 
 
-<!-- MENSAGENS -->
+        <!-- ============================= -->
+        <!-- CONVERSA -->
+        <!-- ============================= -->
 
-<div class="messages">
+        <div class="section">
 
-    <h2>Mensagens</h2>
+            <label for="conversationInput">
+                ID da conversa
+            </label>
 
-    <ul id="messagesList"></ul>
+            <input type="text" id="conversationInput" placeholder="Guid da conversa">
 
-</div>
-```
+            <button id="historyButton" class="history-button">
+                Carregar histórico
+            </button>
 
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
-
-<script>
-
-    // ==========================================
-    // ELEMENTOS
-    // ==========================================
-
-    const tokenInput =
-        document.getElementById("tokenInput");
-
-    const connectButton =
-        document.getElementById("connectButton");
-
-    const status =
-        document.getElementById("status");
-
-    const conversationInput =
-        document.getElementById("conversationInput");
-
-    const messageInput =
-        document.getElementById("messageInput");
-
-    const sendButton =
-        document.getElementById("sendButton");
-
-    const historyButton =
-        document.getElementById("historyButton");
-
-    const messagesList =
-        document.getElementById("messagesList");
+        </div>
 
 
-    // ==========================================
-    // CONEXÃO
-    // ==========================================
+        <!-- ============================= -->
+        <!-- MENSAGEM -->
+        <!-- ============================= -->
 
-    let connection = null;
+        <div class="send-area">
+
+            <div class="form">
+
+                <input type="text" id="messageInput" placeholder="Digite uma mensagem">
+
+            </div>
 
 
-    // ==========================================
-    // ADICIONAR MENSAGEM
-    // ==========================================
+            <!-- ============================= -->
+            <!-- ARQUIVO -->
+            <!-- ============================= -->
 
-    function adicionarMensagem(mensagem) {
+            <div class="file-section">
 
-        console.log(
-            "Mensagem recebida:",
-            mensagem
+                <label for="fileInput">
+                    Anexo
+                </label>
+
+                <input type="file" id="fileInput">
+
+                <div id="selectedFile" class="selected-file">
+                    Nenhum arquivo selecionado.
+                </div>
+
+            </div>
+
+
+            <br>
+
+            <button id="sendButton">
+                Enviar mensagem
+            </button>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- MENSAGENS -->
+        <!-- ============================= -->
+
+        <div class="messages">
+
+            <h2>Mensagens</h2>
+
+            <ul id="messagesList"></ul>
+
+        </div>
+
+    </main>
+
+
+    <!-- SignalR -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+
+
+    <script>
+
+        // ==========================================
+        // CONFIGURAÇÃO
+        // ==========================================
+
+        const API_URL = "http://localhost:5207";
+
+
+        // ==========================================
+        // ELEMENTOS
+        // ==========================================
+
+        const tokenInput =
+            document.getElementById("tokenInput");
+
+        const connectButton =
+            document.getElementById("connectButton");
+
+        const status =
+            document.getElementById("status");
+
+        const conversationInput =
+            document.getElementById("conversationInput");
+
+        const messageInput =
+            document.getElementById("messageInput");
+
+        const sendButton =
+            document.getElementById("sendButton");
+
+        const historyButton =
+            document.getElementById("historyButton");
+
+        const messagesList =
+            document.getElementById("messagesList");
+
+        const fileInput =
+            document.getElementById("fileInput");
+
+        const selectedFile =
+            document.getElementById("selectedFile");
+
+
+        // ==========================================
+        // CONEXÃO SIGNALR
+        // ==========================================
+
+        let connection = null;
+
+
+        // ==========================================
+        // ARQUIVO SELECIONADO
+        // ==========================================
+
+        fileInput.addEventListener(
+            "change",
+            () => {
+
+                const file = fileInput.files[0];
+
+                if (!file) {
+
+                    selectedFile.textContent =
+                        "Nenhum arquivo selecionado.";
+
+                    return;
+                }
+
+                selectedFile.textContent =
+                    `Arquivo selecionado: ${file.name}`;
+
+            }
         );
 
 
-        const li =
-            document.createElement("li");
+        // ==========================================
+        // ADICIONAR MENSAGEM NA TELA
+        // ==========================================
 
+        function adicionarMensagem(mensagem) {
 
-        const author =
-            document.createElement("div");
-
-        author.className =
-            "message-author";
-
-        author.textContent =
-            "Autor: " + mensagem.userName;
-
-
-        const content =
-            document.createElement("div");
-
-        content.className =
-            "message-content";
-
-        content.textContent =
-            mensagem.content;
-
-
-        const time =
-            document.createElement("div");
-
-        time.className =
-            "message-time";
-
-
-        const date =
-            new Date(mensagem.sentAt);
-
-
-        time.textContent =
-            date.toLocaleString("pt-BR");
-
-
-        li.appendChild(author);
-        li.appendChild(content);
-        li.appendChild(time);
-
-        messagesList.appendChild(li);
-    }
-
-
-    // ==========================================
-    // CONECTAR
-    // ==========================================
-
-    connectButton.addEventListener(
-        "click",
-        async () => {
-
-            const token =
-                tokenInput.value.trim();
-
-
-            if (!token) {
-
-                alert(
-                    "Cole um token JWT primeiro."
-                );
-
-                return;
-            }
-
-
-            // Evita criar várias conexões
-
-            if (
-                connection &&
-                connection.state ===
-                    signalR.HubConnectionState.Connected
-            ) {
-
-                alert(
-                    "Já existe uma conexão."
-                );
-
-                return;
-            }
-
-
-            connection =
-                new signalR.HubConnectionBuilder()
-
-                    .withUrl(
-                        "http://localhost:5207/eventHub",
-                        {
-                            accessTokenFactory: () =>
-                                token
-                        }
-                    )
-
-                    .configureLogging(
-                        signalR.LogLevel.Information
-                    )
-
-                    .build();
-
-
-            // ==================================
-            // RECEBER MENSAGEM
-            // ==================================
-
-            connection.on(
-                "ReceiveMessage",
-                (mensagem) => {
-
-                    adicionarMensagem(
-                        mensagem
-                    );
-
-                }
+            console.log(
+                "Mensagem recebida:",
+                JSON.stringify(mensagem, null, 2)
             );
 
 
-            // ==================================
-            // INICIAR
-            // ==================================
-
-            try {
-
-                await connection.start();
-
-                console.log(
-                    "SignalR conectado!"
-                );
-
-                status.textContent =
-                    "Conectado";
-
-            } catch (error) {
-
-                console.error(
-                    "Erro ao conectar:",
-                    error
-                );
-
-                status.textContent =
-                    "Erro ao conectar";
-
-            }
-
-        }
-    );
+            const li =
+                document.createElement("li");
 
 
-    // ==========================================
-    // ENVIAR MENSAGEM
-    // ==========================================
+            // --------------------------------------
+            // AUTOR
+            // --------------------------------------
 
-    sendButton.addEventListener(
-        "click",
-        async () => {
+            const author =
+                document.createElement("div");
 
-            const conversationID =
-                conversationInput.value.trim();
+            author.className =
+                "message-author";
 
-            const message =
-                messageInput.value.trim();
-
-
-            if (!connection ||
-                connection.state !==
-                    signalR.HubConnectionState.Connected) {
-
-                alert(
-                    "Conecte-se primeiro."
-                );
-
-                return;
-            }
+            author.textContent =
+                "Autor: " +
+                (mensagem.userName ?? "Desconhecido");
 
 
-            if (!conversationID) {
+            // --------------------------------------
+            // TEXTO
+            // --------------------------------------
 
-                alert(
-                    "Informe o ID da conversa."
-                );
+            const content =
+                document.createElement("div");
 
-                return;
-            }
+            content.className =
+                "message-content";
 
-
-            if (!message) {
-
-                return;
-            }
+            content.textContent =
+                mensagem.content ?? "";
 
 
-            try {
+            // --------------------------------------
+            // ARQUIVO
+            // --------------------------------------
 
-                await connection.invoke(
-                    "SendMessage",
-                    conversationID,
-                    message
-                );
+            if (mensagem.fileUrl) {
 
+                const fileContainer =
+                    document.createElement("div");
 
-                messageInput.value = "";
-
-
-            } catch (error) {
-
-                console.error(
-                    "Erro ao enviar mensagem:",
-                    error
-                );
-
-            }
-
-        }
-    );
+                fileContainer.className =
+                    "message-file";
 
 
-    // ==========================================
-    // HISTÓRICO
-    // ==========================================
-
-    historyButton.addEventListener(
-        "click",
-        async () => {
-
-            const conversationID =
-                conversationInput.value.trim();
-
-            const token =
-                tokenInput.value.trim();
+                const link =
+                    document.createElement("a");
 
 
-            if (!token) {
+                // Se a API retornar apenas
+                // /uploads/arquivo.pdf,
+                // adicionamos o endereço da API.
 
-                alert(
-                    "Informe o token JWT."
-                );
+                let fileUrl =
+                    mensagem.fileUrl;
 
-                return;
-            }
+                if (fileUrl.startsWith("/")) {
 
-
-            if (!conversationID) {
-
-                alert(
-                    "Informe o ID da conversa."
-                );
-
-                return;
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `http://localhost:5207/conversation/${conversationID}/messages`,
-                        {
-                            method: "GET",
-
-                            headers: {
-                                "Authorization":
-                                    `Bearer ${token}`
-                            }
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
+                    fileUrl =
+                        API_URL + fileUrl;
 
                 }
 
 
-                const messages =
-                    await response.json();
+                link.href = fileUrl;
+
+                link.target = "_blank";
+
+                link.textContent =
+                    "📎 " +
+                    (mensagem.fileName ?? "Abrir arquivo");
 
 
-                messagesList.innerHTML =
-                    "";
+                fileContainer.appendChild(link);
+
+                li.appendChild(fileContainer);
+
+            }
 
 
-                messages.forEach(
-                    mensagem => {
+            // --------------------------------------
+            // HORÁRIO
+            // --------------------------------------
+
+            const time =
+                document.createElement("div");
+
+            time.className =
+                "message-time";
+
+
+            if (mensagem.sentAt) {
+
+                const date =
+                    new Date(mensagem.sentAt);
+
+                time.textContent =
+                    date.toLocaleString("pt-BR");
+
+            }
+
+
+            // --------------------------------------
+            // ADICIONAR ELEMENTOS
+            // --------------------------------------
+
+            li.appendChild(author);
+
+            if (mensagem.content) {
+
+                li.appendChild(content);
+
+            }
+
+            li.appendChild(time);
+
+            messagesList.appendChild(li);
+
+        }
+
+
+        // ==========================================
+        // CONECTAR AO SIGNALR
+        // ==========================================
+
+        connectButton.addEventListener(
+            "click",
+            async () => {
+
+                const token =
+                    tokenInput.value.trim();
+
+
+                if (!token) {
+
+                    alert(
+                        "Cole um token JWT primeiro."
+                    );
+
+                    return;
+
+                }
+
+
+                // Evita criar duas conexões
+
+                if (
+                    connection &&
+                    connection.state ===
+                    signalR.HubConnectionState.Connected
+                ) {
+
+                    alert(
+                        "Já existe uma conexão."
+                    );
+
+                    return;
+
+                }
+
+
+                // --------------------------------------
+                // CRIAR CONEXÃO
+                // --------------------------------------
+
+                connection =
+                    new signalR.HubConnectionBuilder()
+
+                        .withUrl(
+                            `${API_URL}/eventHub`,
+                            {
+                                accessTokenFactory: () =>
+                                    token
+                            }
+                        )
+
+                        .configureLogging(
+                            signalR.LogLevel.Information
+                        )
+
+                        .build();
+
+
+                // --------------------------------------
+                // RECEBER MENSAGEM
+                // --------------------------------------
+
+                connection.on(
+                    "ReceiveMessage",
+                    (mensagem) => {
 
                         adicionarMensagem(
                             mensagem
@@ -572,38 +572,385 @@
                 );
 
 
-            } catch (error) {
+                // --------------------------------------
+                // INICIAR
+                // --------------------------------------
 
-                console.error(
-                    "Erro ao carregar histórico:",
-                    error
+                try {
+
+                    await connection.start();
+
+                    console.log(
+                        "SignalR conectado!"
+                    );
+
+                    status.textContent =
+                        "Conectado";
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Erro ao conectar:",
+                        error
+                    );
+
+                    status.textContent =
+                        "Erro ao conectar";
+
+                }
+
+            }
+        );
+
+
+        // ==========================================
+        // UPLOAD DO ARQUIVO
+        // ==========================================
+
+        async function enviarArquivo(
+            conversationID,
+            token,
+            file
+        ) {
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "file",
+                file
+            );
+
+
+            console.log(
+                "Enviando arquivo:",
+                file.name
+            );
+
+
+            const response =
+                await fetch(
+                    `${API_URL}/conversation/${conversationID}/file`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        },
+
+                        body: formData
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Erro no upload: HTTP ${response.status}`
                 );
 
             }
 
+
+            const result =
+                await response.json();
+
+
+            console.log(
+                "Arquivo enviado:",
+                result
+            );
+
+
+            return result;
+
         }
-    );
 
 
-    // ==========================================
-    // ENTER PARA ENVIAR
-    // ==========================================
+        // ==========================================
+        // ENVIAR MENSAGEM
+        // ==========================================
 
-    messageInput.addEventListener(
-        "keydown",
-        (event) => {
+        sendButton.addEventListener(
+            "click",
+            async () => {
 
-            if (event.key === "Enter") {
+                const conversationID =
+                    conversationInput.value.trim();
 
-                sendButton.click();
+                const message =
+                    messageInput.value.trim();
+
+                const token =
+                    tokenInput.value.trim();
+
+                const file =
+                    fileInput.files[0];
+
+
+                // --------------------------------------
+                // VALIDAÇÕES
+                // --------------------------------------
+
+                if (!connection ||
+                    connection.state !==
+                    signalR.HubConnectionState.Connected) {
+
+                    alert(
+                        "Conecte-se primeiro."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!conversationID) {
+
+                    alert(
+                        "Informe o ID da conversa."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!message && !file) {
+
+                    alert(
+                        "Digite uma mensagem ou selecione um arquivo."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!token) {
+
+                    alert(
+                        "Informe o token JWT."
+                    );
+
+                    return;
+
+                }
+
+
+                try {
+
+                    let fileUrl = null;
+
+                    let fileName = null;
+
+
+                    // ==================================
+                    // 1. UPLOAD DO ARQUIVO
+                    // ==================================
+
+                    if (file) {
+
+                        status.textContent =
+                            "Enviando arquivo...";
+
+
+                        const uploadResult =
+                            await enviarArquivo(
+                                conversationID,
+                                token,
+                                file
+                            );
+
+
+                        fileUrl =
+                            uploadResult.url;
+
+                        fileName =
+                            uploadResult.fileName;
+
+                    }
+
+
+                    // ==================================
+                    // 2. ENVIAR MENSAGEM PELO SIGNALR
+                    // ==================================
+
+                    status.textContent =
+                        "Enviando mensagem...";
+
+
+                    await connection.invoke(
+                        "SendMessage",
+
+                        conversationID,
+
+                        message,
+
+                        fileUrl,
+
+                        fileName
+                    );
+
+
+                    // ==================================
+                    // LIMPAR
+                    // ==================================
+
+                    messageInput.value = "";
+
+                    fileInput.value = "";
+
+                    selectedFile.textContent =
+                        "Nenhum arquivo selecionado.";
+
+
+                    status.textContent =
+                        "Conectado";
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Erro ao enviar:",
+                        error
+                    );
+
+                    status.textContent =
+                        "Erro ao enviar";
+
+                    alert(
+                        "Erro ao enviar mensagem/arquivo. Veja o console."
+                    );
+
+                }
 
             }
+        );
 
-        }
-    );
 
-</script>
+        // ==========================================
+        // HISTÓRICO
+        // ==========================================
+
+        historyButton.addEventListener(
+            "click",
+            async () => {
+
+                const conversationID =
+                    conversationInput.value.trim();
+
+                const token =
+                    tokenInput.value.trim();
+
+
+                if (!token) {
+
+                    alert(
+                        "Informe o token JWT."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!conversationID) {
+
+                    alert(
+                        "Informe o ID da conversa."
+                    );
+
+                    return;
+
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/conversation/${conversationID}/messages`,
+                            {
+                                method: "GET",
+
+                                headers: {
+                                    "Authorization":
+                                        `Bearer ${token}`
+                                }
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `HTTP ${response.status}`
+                        );
+
+                    }
+
+
+                    const messages =
+                        await response.json();
+
+
+                    messagesList.innerHTML =
+                        "";
+
+                    console.log(messages)
+
+                    messages.forEach(
+                        mensagem => {
+
+                            adicionarMensagem(
+                                mensagem
+                            );
+
+                        }
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Erro ao carregar histórico:",
+                        error
+                    );
+
+                    alert(
+                        "Erro ao carregar histórico."
+                    );
+
+                }
+
+            }
+        );
+
+
+        // ==========================================
+        // ENTER PARA ENVIAR
+        // ==========================================
+
+        messageInput.addEventListener(
+            "keydown",
+            (event) => {
+
+                if (event.key === "Enter") {
+
+                    sendButton.click();
+
+                }
+
+            }
+        );
+
+    </script>
 
 </body>
 
 </html>
+```

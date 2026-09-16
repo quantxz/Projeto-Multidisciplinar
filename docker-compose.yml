@@ -11,13 +11,14 @@ services:
       - "5207:5207"
 
     environment:
-      DB_SERVER: {DB_SERVER}
-      DB_NAME: {DB_NAME}
-      DB_USER: {DB_USER}
-      DB_PASSWORD: {DB_PASSWORD}
-      JWT_KEY: {JWT_KEY}
-      JWT_ISSUER: {ProjetoMultidisciplinarAAAAAAAAAAAAA}
-      JWT_AUDIENCE: {ProjetoMultidisciplinarAAAAAAAAAAAAAAA}
+      DB_SERVER: "${DB_SERVER}"
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+
+      JWT_KEY: "${JWT_KEY}"
+      JWT_ISSUER: "${JWT_ISSUER}"
+      JWT_AUDIENCE: "${JWT_AUDIENCE}"
 
     depends_on:
       mysql:
@@ -30,17 +31,21 @@ services:
 
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ProjetoMultidisciplinar
+      MYSQL_DATABASE: ProjetoMultidiciplinar
 
     volumes:
       - mysql_data:/var/lib/mysql
 
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -uroot -proot --silent"
+        ]
       interval: 5s
       timeout: 5s
-      retries: 10
-
+      retries: 20
+      start_period: 30s
 
 volumes:
   mysql_data:
