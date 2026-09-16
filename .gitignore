@@ -22,4 +22,4 @@ obj/
 Thumbs.db
 
 #Files
-.wwwroot/uploads/
+/wwwroot/uploads/
