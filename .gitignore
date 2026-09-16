@@ -19,3 +19,6 @@ obj/
 # OS
 .DS_Store
 Thumbs.db
+
+#Files
+.wwwroot/uploads/
