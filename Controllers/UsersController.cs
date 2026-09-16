@@ -23,20 +23,63 @@ namespace ProjetoMultidiciplinar.Controllers
         private readonly AppDbContext _context;
         private readonly JwtService _jwtService;
         private readonly MessagesService _messagesService;
-        public UsersController(AppDbContext context, JwtService jwtService, MessagesService messagesService)
+        private readonly PhotosService _photosService;
+        public UsersController(AppDbContext context, JwtService jwtService, MessagesService messagesService, PhotosService photosService)
         {
             _jwtService = jwtService;
             _context = context;
             _messagesService = messagesService;
+            _photosService = photosService;
         }
 
         [Authorize]
         [HttpGet("profile")]
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
-            return Ok("Você está autenticado!");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.ID == userGuid);
+
+            if (user == null)
+            {
+                return NotFound("Usuário não encontrado.");
+            }
+
+            return Ok(user);
         }
 
+                [Authorize]
+        [HttpGet("conversations")]
+        public async Task<IActionResult> GetConversations()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized();
+            }
+
+            var Conversations = await _messagesService.GetConversations(userGuid);
+
+            return Ok(Conversations);
+        }
+        
         [HttpPost("register")]
         async public Task<IActionResult> RegisterUser(UserDto User)
         {
@@ -99,8 +142,9 @@ namespace ProjetoMultidiciplinar.Controllers
             });
         }
 
-        [HttpGet("conversations")]
-        public async Task<IActionResult> GetConversations()
+        [Authorize]
+        [HttpPatch("update")]
+        public async Task<IActionResult> updateUser([FromForm] UserUpdateProflieDto userDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -114,10 +158,42 @@ namespace ProjetoMultidiciplinar.Controllers
                 return Unauthorized();
             }
 
-            var Conversations = await _messagesService.GetConversations(userGuid);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.ID == userGuid);
 
-            return Ok(Conversations);
+            if (user == null)
+            {
+                return NotFound("Usuário não encontrado.");
+            }
+
+            if (userDto.Name != null)
+            {
+                user.Name = userDto.Name;
+            }
+
+            if (userDto.Bio != null)
+            {
+                user.Bio = userDto.Bio;
+            }
+
+            if (userDto.Locale != null)
+            {
+                user.Locale = userDto.Locale;
+            }
+
+            if (userDto.PhotoUrl != null)
+            {
+                var photoData = await _photosService.SavePhoto(userDto.PhotoUrl);
+
+                user.PhotoUrl = photoData.Url;
+                Console.WriteLine(photoData);
+            }
+            Console.WriteLine(user.PhotoUrl);
+                        
+
+            await _context.SaveChangesAsync();
+
+            return Ok(user);
         }
-
     }
 }

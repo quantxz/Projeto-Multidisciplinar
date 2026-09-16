@@ -20,6 +20,12 @@
             [Required]
             public String Password { get; set; }
 
+            public String? PhotoUrl { get; set; } = string.Empty;
+
+            public String? Bio { get; set; } = string.Empty;
+
+            public String? Locale { get; set; } = string.Empty;
+
             public String? Rating { get; set; } = string.Empty;
 
             public ICollection<MessagesModel> Messages { get; set; } 

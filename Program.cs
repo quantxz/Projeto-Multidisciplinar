@@ -106,14 +106,15 @@ builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+//arquivo estaticso
+app.UseStaticFiles();
 
-// Configuração do ambiente de desenvolvimento
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Configuração do ambiente de desenvolvimento (voltar isso if() dps)
+
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseCors("Frontend");
 
 app.UseAuthentication();

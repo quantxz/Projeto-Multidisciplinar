@@ -46,7 +46,11 @@ namespace ProjetoMultidiciplinar.Controllers
                 ID = Guid.NewGuid(),
                 AuthorId = Guid.Parse(userId!),
                 Title = annouceData.Title,
-                Location = annouceData.Location
+                Location = annouceData.Location,
+                Description = annouceData.Description,
+                State = annouceData.State,
+                Quantity = annouceData.Quantity,
+                Category = annouceData.Category.ToString()
             };
 
             if (annouceData.Images != null)

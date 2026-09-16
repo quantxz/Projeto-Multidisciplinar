@@ -15,5 +15,23 @@ namespace ProjetoMultidiciplinar.DTOs
         public String Email { get; set; }
 
         public String Password { get; set; }
+
+        public String? PhotoUrl { get; set; } = string.Empty;
+
+        public String? Bio { get; set; } = string.Empty;
+
+        public String? Locale { get; set; } = string.Empty;
+
+    }
+
+    public class UserUpdateProflieDto
+    {
+        public String? Name { get; set; }
+
+        public IFormFile? PhotoUrl { get; set; }
+
+        public String? Bio { get; set; }
+
+        public String? Locale { get; set; }
     }
 }
