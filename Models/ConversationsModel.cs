@@ -10,6 +10,7 @@ namespace ProjetoMultidiciplinar.Models
         public Guid ID { get; set; }
 
         public Guid User1Id { get; set; }
+        
         public Guid User2Id { get; set; }
 
         public ICollection<MessagesModel> Messages { get; set; }

@@ -1,11 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 using ProjetoMultidiciplinar.Services;
+using ProjetoMultidiciplinar.DTOs;
+using ProjetoMultidiciplinar.Data;
+using ProjetoMultidiciplinar.Models;
 
 namespace ProjetoMultidiciplinar.Controllers
 {
@@ -19,10 +23,13 @@ namespace ProjetoMultidiciplinar.Controllers
 
         private readonly FilesService _fileService;
 
-        public ConversationsController(MessagesService messagesService, FilesService fileService)
+        private readonly AppDbContext _context;
+
+        public ConversationsController(MessagesService messagesService, FilesService fileService, AppDbContext context)
         {
             _messageService = messagesService;
             _fileService = fileService;
+            _context = context;
         }
 
         [HttpGet("{conversationId}/messages")]
@@ -83,6 +90,50 @@ namespace ProjetoMultidiciplinar.Controllers
                 fileName = result.FileName,
                 url = result.Url
             });
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateConversation([FromBody] CreateConversationsDto dto)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized();
+
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            if (userId == dto.UserId)
+                return BadRequest("Você não pode iniciar uma conversa consigo mesmo.");
+
+            var otherUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.ID == dto.UserId);
+
+            if (otherUser == null)
+                return NotFound("Usuário não encontrado.");
+
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c =>
+                    (c.User1Id == userId && c.User2Id == dto.UserId) ||
+                    (c.User1Id == dto.UserId && c.User2Id == userId)
+                );
+
+            if (conversation == null)
+            {
+                conversation = new ConversationsModel
+                {
+                    ID = Guid.NewGuid(),
+                    User1Id = userId,
+                    User2Id = dto.UserId
+                };
+
+                _context.Conversations.Add(conversation);
+
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(conversation);
         }
     }
 }

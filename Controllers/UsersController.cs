@@ -92,6 +92,16 @@ namespace ProjetoMultidiciplinar.Controllers
                 Rating = "0"
             };
 
+            var userAlredyCreated = _context.Users.FirstOrDefault(u => u.Email == User.Email);
+            
+            if(userAlredyCreated != null)
+            {
+                return Conflict(new 
+                {
+                    message = "Ja existe um usuario com este email."
+                });
+            }
+
             var passwordHasher = new PasswordHasher<UsersModel>();
 
             user.Password = passwordHasher.HashPassword(

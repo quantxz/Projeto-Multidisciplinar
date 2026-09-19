@@ -17,6 +17,7 @@ namespace ProjetoMultidiciplinar.Models
         public String Location { get; set; }
         
         [Required]
+        [StringLength(50, MinimumLength =10, ErrorMessage="A descrição do produto deve ter ao menos 10 caracteres")]
         public String Description { get; set; } = string.Empty;
 
         [Required]
