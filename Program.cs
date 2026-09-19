@@ -194,32 +194,32 @@ app.MapControllers();
 app.MapHub<EventHub>("/eventHub");
 
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var context = scope.ServiceProvider
-//         .GetRequiredService<AppDbContext>();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
-//     var conversation = new ConversationsModel
-//     {
-//         ID = Guid.NewGuid(),
+    var conversation = new ConversationsModel
+    {
+        ID = Guid.NewGuid(),
 
-//         User1Id = Guid.Parse(
-//             "18689fa9-1b4a-4dc2-8e94-987ba871ac95"
-//         ),
+        User1Id = Guid.Parse(
+            "2a50545a-a119-45f0-86a2-f1ea4ccab843"
+        ),
 
-//         User2Id = Guid.Parse(
-//             "11f49825-d4d1-4239-92c3-a7af882cd9b7"
-//         )
-//     };
+        User2Id = Guid.Parse(
+            "def7c98e-8466-42ea-a7d2-6db818c6fe7b"
+        )
+    };
 
-//     context.Conversations.Add(conversation);
+    context.Conversations.Add(conversation);
 
-//     await context.SaveChangesAsync();
+    await context.SaveChangesAsync();
 
-//     Console.WriteLine(
-//         $"Conversation criada: {conversation.ID}"
-//     );
-// }
+    Console.WriteLine(
+        $"Conversation criada: {conversation.ID}"
+    );
+}
 
 
 app.Run();

@@ -59,7 +59,7 @@ namespace ProjetoMultidiciplinar.Controllers
             return Ok(user);
         }
 
-                [Authorize]
+        [Authorize]
         [HttpGet("conversations")]
         public async Task<IActionResult> GetConversations()
         {
@@ -75,11 +75,12 @@ namespace ProjetoMultidiciplinar.Controllers
                 return Forbid();
             }
 
-            var Conversations = await _messagesService.GetConversations(userGuid);
+            var conversations =
+                await _messagesService.GetConversations(userGuid);
 
-            return Ok(Conversations);
+            return Ok(conversations);
         }
-        
+
         [HttpPost("register")]
         async public Task<IActionResult> RegisterUser(UserDto User)
         {
@@ -152,7 +153,7 @@ namespace ProjetoMultidiciplinar.Controllers
             {
                 return Unauthorized();
             }
-
+            Console.WriteLine(userDto);
             if (!Guid.TryParse(userId, out var userGuid))
             {
                 return Unauthorized();
@@ -189,7 +190,7 @@ namespace ProjetoMultidiciplinar.Controllers
                 Console.WriteLine(photoData);
             }
             Console.WriteLine(user.PhotoUrl);
-                        
+
 
             await _context.SaveChangesAsync();
 

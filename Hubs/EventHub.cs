@@ -22,63 +22,113 @@ namespace ProjetoMultidiciplinar.Hubs
             string? fileUrl = null,
             string? fileName = null)
         {
-            if (string.IsNullOrWhiteSpace(message) &&
-                string.IsNullOrWhiteSpace(fileUrl))
+            try
             {
-                throw new HubException(
-                    "A mensagem precisa conter texto ou arquivo."
+                Console.WriteLine("========== EVENT HUB ==========");
+                Console.WriteLine($"Conversation: {conversationID}");
+                Console.WriteLine($"Message: {message}");
+                Console.WriteLine($"FileUrl: {fileUrl}");
+
+                if (string.IsNullOrWhiteSpace(message) &&
+                    string.IsNullOrWhiteSpace(fileUrl))
+                {
+                    throw new HubException(
+                        "A mensagem precisa conter texto ou arquivo."
+                    );
+                }
+
+                var userId = Context.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                Console.WriteLine($"UserId: {userId}");
+
+                if (!Guid.TryParse(userId, out var authorId))
+                {
+                    throw new HubException("Usuário não autenticado.");
+                }
+
+                var userName = Context.User?
+                    .FindFirst(ClaimTypes.Name)?.Value;
+
+                Console.WriteLine($"UserName: {userName}");
+
+                var conversation = await _messagesService
+                    .GetConversation(conversationID);
+
+                Console.WriteLine(
+                    $"Conversation encontrada: {conversation != null}"
                 );
+
+                if (conversation == null)
+                {
+                    throw new HubException("Conversa não encontrada.");
+                }
+
+                Guid receiverId;
+
+                if (conversation.User1Id == authorId)
+                {
+                    receiverId = conversation.User2Id;
+                }
+                else if (conversation.User2Id == authorId)
+                {
+                    receiverId = conversation.User1Id;
+                }
+                else
+                {
+                    throw new HubException(
+                        "Você não participa dessa conversa."
+                    );
+                }
+
+                var newMessage = new MessagesDto
+                {
+                    ID = Guid.NewGuid(),
+                    AuthorId = authorId,
+                    ConversationId = conversationID,
+                    Content = message,
+                    SentAt = DateTime.UtcNow,
+                    UserName = userName,
+                    FileUrl = fileUrl
+                };
+
+                Console.WriteLine("Salvando mensagem...");
+
+                await _messagesService.SaveMessages(newMessage);
+
+                Console.WriteLine("Mensagem salva!");
+
+                await Clients.User(receiverId.ToString())
+                    .SendAsync("ReceiveMessage", newMessage);
+
+                await Clients.Caller
+                    .SendAsync("ReceiveMessage", newMessage);
+
+                Console.WriteLine("Mensagem enviada aos clientes!");
             }
-
-            var userId = Context.User?
-                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!Guid.TryParse(userId, out var authorId))
-                throw new HubException("Usuário não autenticado.");
-
-            var userName = Context.User?
-                .FindFirst(ClaimTypes.Name)?.Value;
-
-            var conversation = await _messagesService
-                .GetConversation(conversationID);
-
-            if (conversation == null)
-                throw new HubException("Conversa não encontrada.");
-
-
-
-            Guid receiverId;
-
-            if (conversation.User1Id == authorId)
-                receiverId = conversation.User2Id;
-            else if (conversation.User2Id == authorId)
-                receiverId = conversation.User1Id;
-            else
-                throw new HubException(
-                    "Você não participa dessa conversa."
-                );
-
-            var newMessage = new MessagesDto
+            catch (Exception ex)
             {
-                ID = Guid.NewGuid(),
-                AuthorId = authorId,
-                ConversationId = conversationID,
-                Content = message,
-                SentAt = DateTime.UtcNow,
-                UserName = userName,
-                FileUrl = fileUrl
-            };
+                Console.WriteLine("========== ERRO EVENT HUB ==========");
+                Console.WriteLine($"Tipo: {ex.GetType().FullName}");
+                Console.WriteLine($"Mensagem: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
 
-            // Salva
-            await _messagesService.SaveMessages(newMessage);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine("========== INNER EXCEPTION ==========");
+                    Console.WriteLine(
+                        $"Tipo: {ex.InnerException.GetType().FullName}"
+                    );
+                    Console.WriteLine(
+                        $"Mensagem: {ex.InnerException.Message}"
+                    );
+                    Console.WriteLine(
+                        $"StackTrace: {ex.InnerException.StackTrace}"
+                    );
+                }
 
-            // Envia para o outro usuário
-            await Clients.User(receiverId.ToString())
-                .SendAsync("ReceiveMessage", newMessage);
-
-            // Opcional: envia para o próprio remetente
-            await Clients.Caller
-                .SendAsync("ReceiveMessage", newMessage);
+                throw;
+            }
         }
     }
 }
